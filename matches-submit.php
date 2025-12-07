@@ -11,12 +11,15 @@
         $file = $fileArr = $returnUserName = $haveSignUp = $userArr = $matchArr = '';
 
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            $file = file('./match/singles.txt', FILE_USE_INCLUDE_PATH);
+            $file = file('./match/singles.txt');
             $fileArr = [];
-            foreach ($file as $key => $value) {
-                $fileArr[$key] = explode(',', $value);
+            foreach ($file as $key => $line) {
+                $line = trim($line);
+                if ($line === '') { continue; }
+                $parts = array_map('trim', explode(',', $line));
+                $fileArr[$key] = array_pad($parts, 7, '');
             }
-            $returnUserName = $_GET['returnUserName'];
+            $returnUserName = isset($_GET['returnUserName']) ? $_GET['returnUserName'] : '';
             $haveSignUp = 0;
             foreach ($fileArr as $value) {
                 if ($returnUserName === $value[0]) {
@@ -34,9 +37,9 @@
                     if (
                         ($value[0] !== $userArr[0]) &&
                         ($value[1] !== $userArr[1]) && 
-                        (((int)$value[2] >= (int)$userArr[5]) && ((int)$value[2]) <= (int)$userArr[6]) &&
-                        ($value[4] === $userArr[4]) &&
-                        (personalityCheck($value[3], $userArr[3]))
+                        ($value[2] !== '' && $userArr[5] !== '' && $userArr[6] !== '' && ((int)$value[2] >= (int)$userArr[5]) && ((int)$value[2] <= (int)$userArr[6])) &&
+                        ($value[4] !== '' && $userArr[4] !== '' && $value[4] === $userArr[4]) &&
+                        ($value[3] !== '' && $userArr[3] !== '' && personalityCheck($value[3], $userArr[3]))
                     ) {
                         searchMatch($value[0], $value[1], $value[2], $value[3], $value[4]);
                     }
